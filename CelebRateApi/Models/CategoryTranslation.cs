@@ -7,6 +7,6 @@
         public int LanguageId { get; set; }
         public Language Language { get; set; } = null!;
 
-        // The question is if Language has to have a Tag Translation list 
+        public string CategoryName { get; set; } = null!;
     }
 }

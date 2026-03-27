@@ -10,7 +10,7 @@
 
         // Needs reconsideration
         public int Category { get; set; }
-        public Category Categories { get; set; } = null!;
+        public CelebCategory CelebCategory { get; set; } = null!;
 
         public int Order { get; set; }
     }
