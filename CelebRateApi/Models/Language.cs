@@ -1,0 +1,12 @@
+﻿namespace CelebRateApi.Models
+{
+    public class Language
+    {
+        public int LanguageId { get; set; }
+        public string Name { get; set; } = null!;
+
+        
+        public ICollection<ApplicationUser> ApplicationUsers { get; set; } = [];
+        public ICollection<CelebTranslation> CelebTranslations { get; set; } = [];
+    }
+}
