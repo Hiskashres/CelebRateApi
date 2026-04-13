@@ -13,8 +13,5 @@ namespace CelebRateApi.Models
        
         public ICollection<Rate> Rates { get; set; } = [];
         public ICollection<CelebCategoryTranslation> CelebCategoryTranslations { get; set; } = [];
-
-        // Needs reconsideration
-        public ICollection<CelebTag> CelebTags { get; set; } = [];
     }
 }

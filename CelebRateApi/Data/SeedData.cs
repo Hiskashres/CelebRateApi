@@ -8,7 +8,7 @@ namespace CelebRateApi.Data
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            string[] roles = ["User", "Admin", "Administrator"];
+            string[] roles = ["User", "Moderator", "Admin"];
 
             foreach (var role in roles)
             {

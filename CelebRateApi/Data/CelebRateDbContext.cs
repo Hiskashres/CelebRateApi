@@ -11,7 +11,6 @@ namespace CelebRateApi.Data
         public DbSet<Rate> Rates => Set<Rate>();
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<Language> Languages => Set<Language>();
-        public DbSet<CelebTag> CelebsTags => Set<CelebTag>();
         public DbSet<CelebCategory> CelebCategories => Set<CelebCategory>();
         public DbSet<CelebTranslation> CelebTranslations => Set<CelebTranslation>();
         public DbSet<CategoryTranslation> CategoryTranslations => Set<CategoryTranslation>();
@@ -24,56 +23,74 @@ namespace CelebRateApi.Data
 
             // Composite keys
             modelBuilder.Entity<Rate>().HasKey(r => new { r.ApplicationUserId, r.CelebId, r.CategoryId });
-            modelBuilder.Entity<CelebTag>().HasKey(ct => new { ct.CelebId, ct.TagId });
             modelBuilder.Entity<CelebCategory>().HasKey(sc => new { sc.CelebId, sc.CategoryId });
-            modelBuilder.Entity<CelebLanguage>().HasKey(sl => new { sl.CelebId, sl.LanguageId });
+            modelBuilder.Entity<CategoryTranslation>().HasKey(ct => new { ct.CategoryId, ct.LanguageId });
+            modelBuilder.Entity<CelebCategoryTranslation>().HasKey(cct => new { cct.LanguageId, cct.CelebId, cct.CategoryId });
+            modelBuilder.Entity<CelebTranslation>().HasKey(ct => new { ct.CelebId, ct.LanguageId });
+            modelBuilder.Entity<TagTranslation>().HasKey(tt => new { tt.TagId, tt.LanguageId });
 
             // Relationships
 
-            //modelBuilder.Entity<CelebCategory>()
-            //    .HasOne(cc => cc.Celeb)
-            //    .WithMany(c => c.CelebCategories)
-            //    .HasForeignKey(cc => cc.CelebId);
+            modelBuilder.Entity<CelebCategory>()
+                .HasOne(cc => cc.Celeb)
+                .WithMany(c => c.CelebCategories)
+                .HasForeignKey(cc => cc.CelebId);
 
-            //modelBuilder.Entity<CelebCategory>()
-            //    .HasOne(cc => cc.Category)
-            //    .WithMany(c => c.CelebCategories)
-            //    .HasForeignKey(cc => cc.CategoryId);
+            modelBuilder.Entity<CelebCategory>()
+                .HasOne(cc => cc.Category)
+                .WithMany(c => c.CelebCategories)
+                .HasForeignKey(cc => cc.CategoryId);
 
-            //modelBuilder.Entity<Rate>()
-            //    .HasOne(r => r.ApplicationUser)
-            //    .WithMany(u => u.Rates)
-            //    .HasForeignKey(r => r.UserId);
+            modelBuilder.Entity<Rate>()
+                .HasOne(r => r.ApplicationUser)
+                .WithMany(u => u.Rates)
+                .HasForeignKey(r => r.ApplicationUserId);
 
-            //modelBuilder.Entity<Rate>()
-            //   .HasOne<CelebCategory>()
-            //   .WithMany(cc => cc.Rates)
-            //   .HasForeignKey(r => new { r.CelebId, r.CategoryId });
+            modelBuilder.Entity<Rate>()
+               .HasOne<CelebCategory>()
+               .WithMany(cc => cc.Rates)
+               .HasForeignKey(r => new { r.CelebId, r.CategoryId })
+               .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<CelebTag>()
-            //   .HasOne(c => c.Celeb)
-            //   .WithMany(ct => ct.CelebTags)
-            //   .HasForeignKey(c => c.CelebId);
+            modelBuilder.Entity<CategoryTranslation>()
+               .HasOne(ct => ct.Category)
+               .WithMany(c => c.CategoryTranslations)
+               .HasForeignKey(ct => ct.CategoryId);
 
-            //modelBuilder.Entity<CelebTag>()
-            //    .HasOne(ct => ct.Tag)
-            //    .WithMany(t => t.CelebTags)
-            //    .HasForeignKey(ct => ct.TagId);
+            modelBuilder.Entity<CategoryTranslation>()
+                .HasOne(ct => ct.Language)
+                .WithMany(l => l.CategoryTranslations)
+                .HasForeignKey(ct => ct.LanguageId);
 
-            //modelBuilder.Entity<CelebLanguage>()
-            //   .HasOne(c => c.Celeb)
-            //   .WithMany(cl => cl.CelebLanguages)
-            //   .HasForeignKey(c => c.CelebId);
+            modelBuilder.Entity<CelebCategoryTranslation>()
+               .HasOne(cct => cct.Language)
+               .WithMany(l => l.CelebCategoryTranslations)
+               .HasForeignKey(cct => cct.LanguageId);
 
-            //modelBuilder.Entity<CelebLanguage>()
-            //    .HasOne(cl => cl.Language)
-            //    .WithMany(l => l.CelebLanguages)
-            //    .HasForeignKey(cl => cl.LanguageId);
+            modelBuilder.Entity<CelebCategoryTranslation>()
+                .HasOne(cct => cct.CelebCategory)
+                .WithMany(cc => cc.CelebCategoryTranslations)
+                .HasForeignKey(cct => new { cct.CelebId, cct.CategoryId });
 
-            //modelBuilder.Entity<Language>()
-            //        .HasMany(l => l.ApplicationUsers)
-            //        .WithOne(au => au.Language)
-            //        .HasForeignKey(au => au.LanguageId);
+            modelBuilder.Entity<CelebTranslation>()
+               .HasOne(ct => ct.Celeb)
+               .WithMany(c => c.CelebTranslations)
+               .HasForeignKey(c => c.CelebId);
+
+            modelBuilder.Entity<CelebTranslation>()
+                .HasOne(ct => ct.Language)
+                .WithMany(l => l.CelebTranslations)
+                .HasForeignKey(ct => ct.LanguageId);
+
+            modelBuilder.Entity<TagTranslation>()
+               .HasOne(tt => tt.Tag)
+               .WithMany(t => t.TagTranslations)
+               .HasForeignKey(tt => tt.TagId);
+
+            modelBuilder.Entity<CelebTranslation>()
+                .HasOne(tt => tt.Language)
+                .WithMany(l => l.CelebTranslations)
+                .HasForeignKey(tt => tt.LanguageId);
         }
     }
 }

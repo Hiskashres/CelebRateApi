@@ -6,7 +6,6 @@
         public float Stars { get; set; }
 
         public ICollection<CelebCategory> CelebCategories { get; set; } = [];
-        public ICollection<CelebTag> CelebTags { get; set; } = [];
         public ICollection<CelebTranslation> CelebTranslations { get; set; } = [];
     }
 }

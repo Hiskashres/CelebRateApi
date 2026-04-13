@@ -3,8 +3,9 @@
     public class Language
     {
         public int LanguageId { get; set; }
+        public string Name { get; set; } = null!;
         public string ShortName { get; set; } = null!;
-        public string FullName { get; set; } = null!;
+        public string FullNameEnglish { get; set; } = null!;
 
         public ICollection<ApplicationUser> ApplicationUsers { get; set; } = [];
         public ICollection<CelebTranslation> CelebTranslations { get; set; } = [];

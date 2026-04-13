@@ -8,7 +8,6 @@
 
         public Language Language { get; set; } = null!;
         public CelebCategory CelebCategory { get; set; } = null!;
-        public CategoryTranslation CategoryTranslation { get; set; } = null!;
 
         public string Specialty1 { get; set; } = null!;
         public string Specialty2 { get; set; } = null!;

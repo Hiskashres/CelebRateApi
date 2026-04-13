@@ -1,12 +1,15 @@
+using CelebRateApi.Authorization.Handlers;
+using CelebRateApi.Authorization.Requirements;
 using CelebRateApi.Data;
 using CelebRateApi.Models;
 using CelebRateApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,12 +47,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireModerator", policy =>
+        policy.RequireRole("Moderator", "Admin"))
     .AddPolicy("RequireAdmin", policy =>
-        policy.RequireRole("Admin"))
-    .AddPolicy("RequireAdministator", policy =>
-        policy.RequireRole("Administator"))
-    .AddPolicy("RequireUser", policy =>
-        policy.RequireRole("User"));
+        policy.RequireRole("Admin"));
 
 builder.Services.AddDbContext<CelebRateDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -82,14 +83,37 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 });
-builder.Services.AddIdentityCore<ApplicationUser>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<CelebRateDbContext>();
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<CelebRateDbContext>();
+
+builder.Services.AddSingleton<IAuthorizationHandler, IsOwnerHandler>();
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("IsOwner", policy =>
+        policy.Requirements.Add(new IsOwnerRequirement()));
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 var app = builder.Build();
+
+var supportedCultures = new[] { "en", "yi" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("en")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+localizationOptions.RequestCultureProviders.Insert(0,
+    new QueryStringRequestCultureProvider { QueryStringKey = "culture" });
+
+app.UseRequestLocalization(localizationOptions);
 
 using (var scope = app.Services.CreateScope())
 {

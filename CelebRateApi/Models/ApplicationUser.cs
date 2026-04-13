@@ -4,7 +4,7 @@ namespace CelebRateApi.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public int LanguageId { get; set; }
+        public int? LanguageId { get; set; }
         public Language Language { get; set; } = null!;
 
         public bool Male { get; set; }
