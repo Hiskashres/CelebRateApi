@@ -1,12 +1,9 @@
-﻿namespace CelebRateApi.Models
+﻿namespace CelebRateApi.DTOs
 {
-    public class CelebTranslation
+    public class CelebDTO
     {
         public int CelebId { get; set; }
-        public Celeb Celeb { get; set; } = null!;
         public int LanguageId { get; set; }
-        public Language Language { get; set; } = null!;
-
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Description { get; set; } = null!;

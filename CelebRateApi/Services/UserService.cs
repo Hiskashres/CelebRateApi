@@ -41,7 +41,8 @@ namespace CelebRateApi.Services
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            user.UserName = roles.Contains("Admin") ? dto.UserName : dto.Email;
+            user.UserName = roles.Contains("Moderator") || roles.Contains("Admin")
+                ? dto.UserName : dto.Email;
 
             var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
             if (!emailResult.Succeeded)

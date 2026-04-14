@@ -108,15 +108,6 @@ namespace CelebRateApi.Controllers
         [HttpDelete("delete-users")]
         public async Task<IActionResult> DeleteUsersAsync(string[] userIds)
         {
-            //var user = await _userManager.FindByIdAsync(dto.UserId);
-
-            //if (user == null)
-            //    return NotFound("User not found");
-
-            //var authorizationResult = await _authorizationService.AuthorizeAsync(User, user, "IsOwner");
-            //if (!authorizationResult.Succeeded && !User.IsInRole("Administrator"))
-            //    return Forbid();
-
             var result = await _userService.DeleteUsersAsync(userIds);
 
             if (!result.Success)
