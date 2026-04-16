@@ -7,33 +7,26 @@ using System.Data;
 
 namespace CelebRateApi.Services
 {
-    public class UserService(UserManager<ApplicationUser> userManager, CelebRateDbContext _context)
+    /// <summary>
+    /// Handles all User related business logic.
+    /// </summary>
+    /// <remarks>
+    /// Typicaly uses ASP.NET Identity (UserManager) for database queries.
+    /// </remarks>
+    public class UserService(UserManager<ApplicationUser> userManager, CelebRateDbContext context)
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly CelebRateDbContext _context = context;
 
-        public async Task<(bool Success, IEnumerable<string>? Errors)> CreateNewUserAsync(UserDTO dto)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = dto.Email,
-                Email = dto.Email,
-                Age = dto.Age,
-                Male = dto.Male,
-                ZipCode = dto.ZipCode
-            };
-
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-                return (false, result.Errors.Select(e => e.Description));
-
-            var roleResult = await _userManager.AddToRoleAsync(user, "User");
-            if (!roleResult.Succeeded)
-                return (false, roleResult.Errors.Select(e => e.Description));
-
-            return (true, null);
-        }
-
-        public async Task<(bool Success, IEnumerable<string>? Errors)> EditUserAsync(UserDTO dto)
+        /// <summary>
+        /// Edits an existing User profile.
+        /// </summary>
+        /// <remarks>
+        /// Email must be unique and must meet the Email Policy guidlines.
+        /// The default UserName is equal to Email, Only a Moderator or Admin can have a different UserName.
+        /// </remarks>
+        /// <returns> Tuple: indicates if succeeded and any error messages. </returns>
+        public async Task<(bool Success, IEnumerable<string>? Errors)> EditUserProfileAsync(UserDTO dto)
         {
             var user = await _userManager.FindByIdAsync(dto.UserId);
             if (user == null)
@@ -62,20 +55,14 @@ namespace CelebRateApi.Services
             return (true, null);
         }
 
-        public async Task<(bool Success, IEnumerable<string>? Errors)> ChangePasswordAsync(PasswordDTO dto)
-        {
-            var user = await _userManager.FindByIdAsync(dto.UserId);
-            if (user == null)
-                return (false, new[] { "User not found" });
-
-            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
-
-            if (!result.Succeeded)
-                return (false, result.Errors.Select(e => e.Description));
-
-            return (true, null);
-        }
-
+        /// <summary>
+        /// Changes User's Role
+        /// </summary>
+        /// <remarks>
+        /// User can have only one Role at a time.
+        /// Removes all current User's roles before adding the new one.
+        /// </remarks>
+        /// <returns> Tuple: indicates if succeeded and any error messages. </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> ChangeUserRoleAsync(UserRoleDTO dto)
         {
             var user = await _userManager.FindByIdAsync(dto.UserId);
@@ -87,7 +74,6 @@ namespace CelebRateApi.Services
                 return (false, new[] { "Invalid role" });
 
             var currentRoles = await _userManager.GetRolesAsync(user);
-
             var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!removeResult.Succeeded)
                 return (false, removeResult.Errors.Select(e => e.Description));
@@ -99,22 +85,21 @@ namespace CelebRateApi.Services
             return (true, null);
         }
 
+        /// <summary>
+        /// Deletes a list of Users
+        /// Deletes directly from the database, because UserManager hardly handles list-deletion
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages. </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> DeleteUsersAsync(string[] userIds)
         {
-            // Creates list of all instances to delete
             var users = await _context.Users
                 .Where(u => userIds.Contains(u.Id))
                 .ToListAsync();
-
-            // If no instances in the list, return false
             if (!users.Any())
                 return (false, new[] {"Users not found"});
 
-            // Removes from DB all instances in the list
             _context.Users.RemoveRange(users);
             await _context.SaveChangesAsync();
-
-            // Else, if something was deleted, return true
 
             return (true, null);
         }

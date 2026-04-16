@@ -8,8 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CelebRateApi.Services
 {
+    /// <summary>
+    /// Handles all Celeb and CelebTranslation related business logic.
+    /// </summary>
     public class CelebService(CelebRateDbContext _context)
     {
+        /// <summary>
+        /// Creates a new Celeb including its first CelebTranslation.
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> CreateNewCelebAsync(CelebDTO dto)
         {
             var celeb = new Celeb { 
@@ -27,11 +34,18 @@ namespace CelebRateApi.Services
             };
 
             await _context.Celebs.AddAsync(celeb);
-            await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+                return (false, new[] { "Creation failed" });
+
 
             return (true, null);
         }
 
+        /// <summary>
+        /// Deletes a list of Celebs.
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> DeleteCelebsAsync(int[] celebIds)
         {
             var celebs = await _context.Celebs
@@ -42,11 +56,17 @@ namespace CelebRateApi.Services
                 return (false, new[] { "No celeb found" });
 
             _context.Celebs.RemoveRange(celebs);
-            await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+                return (false, new[] { "Deletion failed" });
 
             return (true, null);
         }
 
+        /// <summary>
+        /// Creates a new CelebTranslation for an existing Celeb.
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> CreateNewCelebTranslationAsync(CelebDTO dto)
         {
             var celebCheck = await _context.Celebs
@@ -62,7 +82,7 @@ namespace CelebRateApi.Services
             var celebTranslationCheck = await _context.CelebTranslations
                 .FindAsync(dto.CelebId, dto.LanguageId);
             if (celebTranslationCheck != null)
-                return (false, new[] { "CelebTranslatien already exists" });
+                return (false, new[] { "CelebTranslation already exists" });
 
             var celebTranslation = new CelebTranslation
             {
@@ -74,33 +94,49 @@ namespace CelebRateApi.Services
             };
 
             await _context.CelebTranslations.AddAsync(celebTranslation);
-            await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+                return (false, new[] { "Creation failed" });
 
             return (true, null);
         }
 
+        /// <summary>
+        /// Edits an existing CelebTranslation.
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> EditCelebTranslationAsync(CelebDTO dto)
         {
             var celebTranslation = await _context.CelebTranslations
                 .FindAsync(dto.CelebId, dto.LanguageId);
             if (celebTranslation == null)
-                return (false, new[] { "CelebTranslatien not found" });
+                return (false, new[] { "CelebTranslation not found" });
 
             celebTranslation.FirstName = dto.FirstName;
             celebTranslation.LastName = dto.LastName;
             celebTranslation.Description = dto.Description;
 
-            await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            if (result == 0)
+                return (false, new[] { "Update failed" });
 
             return (true, null);
         }
 
+        /// <summary>
+        /// 1. Deletes a list of CelebTranslations.
+        /// 2. Deletes a Celeb that remains without any CelebTranslations.
+        /// Fails if CelebTranslation OR Celeb deletion doesn't succeed.
+        /// </summary>
+        /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> DeleteCelebTranslationsAsync(CelebDTO[] dtos)
         {
+            // Ensures That CelebTranslation-deletion is rolled back if Celeb-deletion fails. 
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
+                // .AsEnumerable() is needed beause SQL can't handle dtos.Any().
                 var celebTranslations = _context.CelebTranslations
                     .AsEnumerable()
                     .Where(ct => dtos.Any(d =>
@@ -112,8 +148,12 @@ namespace CelebRateApi.Services
                     return (false, new[] { "No celebTranslation found" });
 
                 _context.CelebTranslations.RemoveRange(celebTranslations);
-                await _context.SaveChangesAsync();
+                var translationResult = await _context.SaveChangesAsync();
+                if (translationResult == 0)
+                    return (false, new[] { "Deletion failed" });
 
+
+                // Celeb deletion
                 foreach (var dto in dtos)
                 {
                     var lastCelebTranslation = await _context.CelebTranslations
@@ -128,8 +168,9 @@ namespace CelebRateApi.Services
                             _context.Celebs.Remove(celebToRemove);
                     }
                 }
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                var celebResult = await _context.SaveChangesAsync();
+                if (celebResult == 0)
+                    return (false, new[] { "Deletion failed" }); await transaction.CommitAsync();
 
                 return (true, null);
             }

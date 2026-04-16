@@ -1,0 +1,10 @@
+﻿namespace CelebRateApi.DTOs
+{
+    public class CategoryDTO
+    {
+        public int CategoryId { get; set; }
+        public int LanguageId { get; set; }
+        public string CategoryName { get; set; } = null!;
+        public int Order { get; set; }
+    }
+}

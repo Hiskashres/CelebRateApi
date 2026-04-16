@@ -7,11 +7,17 @@ using System.Text;
 
 namespace CelebRateApi.Services
 {
+    /// <summary>
+    /// Handles all token related business logic.
+    /// </summary>
     public class JwtService(IConfiguration config, UserManager<ApplicationUser> userManager)
     {
         private readonly IConfiguration _config = config;
-        private readonly UserManager<ApplicationUser> _userManager = userManager;
 
+        /// <summary>
+        /// Creates a new token including user's identity and Roles.
+        /// </summary>
+        /// <returns> The token as a string. </returns>
         public async Task<string> GenerateToken(ApplicationUser user)
         {
             var claims = new List<Claim>

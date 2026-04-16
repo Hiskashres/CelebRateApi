@@ -18,6 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CelebService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CategoryService>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
