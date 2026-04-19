@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CelebRateApi.Controllers
 {
+    /// <summary>
+    /// Handles all user-identity related HTTP requests.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController(
@@ -45,12 +48,8 @@ namespace CelebRateApi.Controllers
         public async Task<IActionResult> ChangePasswordAsync(PasswordDTO dto)
         {
             var user = await _userManager.FindByIdAsync(dto.UserId);
-
-            if (user == null)
-                return NotFound("User not found");
-
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, user, "IsOwner");
-            if (!authorizationResult.Succeeded && !User.IsInRole("Administrator"))
+            if (!authorizationResult.Succeeded && !User.IsInRole("Admin"))
                 return Forbid();
 
             var result = await _authService.ChangePasswordAsync(dto);

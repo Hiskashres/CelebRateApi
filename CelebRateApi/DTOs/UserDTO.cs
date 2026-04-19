@@ -8,6 +8,6 @@
         public string Password { get; set; } = null!;
         public bool Male { get; set; }
         public int Age { get; set; }
-        public int ZipCode { get; set; }
+        public string ZipCode { get; set; }
     }
 }

@@ -1,8 +1,12 @@
 using CelebRateApi.Authorization.Handlers;
 using CelebRateApi.Authorization.Requirements;
 using CelebRateApi.Data;
+using CelebRateApi.Handlers;
 using CelebRateApi.Models;
 using CelebRateApi.Services;
+using CelebRateApi.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -59,6 +63,13 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddDbContext<CelebRateDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserRoleValidator>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -116,6 +127,8 @@ var localizationOptions = new RequestLocalizationOptions()
 
 localizationOptions.RequestCultureProviders.Insert(0,
     new QueryStringRequestCultureProvider { QueryStringKey = "culture" });
+
+app.UseExceptionHandler();
 
 app.UseRequestLocalization(localizationOptions);
 

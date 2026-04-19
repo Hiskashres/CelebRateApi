@@ -1,11 +1,13 @@
 ﻿using CelebRateApi.DTOs;
 using CelebRateApi.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CelebRateApi.Controllers
 {
+    /// <summary>
+    /// Handles all Celeb related HTTP requests.
+    /// </summary>
     [Authorize(policy: "RequireModerator")]
     [Route("api/[controller]")]
     [ApiController]

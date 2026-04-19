@@ -20,25 +20,28 @@ namespace CelebRateApi.Data
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            //var defoultLanguage = await context.Languages
-            //    .FirstOrDefaultAsync(l => l.ShortName == _config["DefaultLanguage"])
-            //    ?? throw new Exception("Default language not found");
+            var categories = new[]
+            {
+                new { CategoryName = "category1", Order = 1 },
+                new { CategoryName = "category2", Order = 2 },
+                new { CategoryName = "category3", Order = 3 },
+                new { CategoryName = "category4", Order = 4 },
+                new { CategoryName = "category5", Order = 5 },
+            };
 
-            //string[] categories = ["Category1", "Category2", "Category3", "Category4", "Category5"];
+            foreach (var category in categories)
+            {
+                bool exists = context.Categories
+                    .Any(c => c.DefaultName == category.CategoryName);
 
-            //foreach (var category in categories)
-            //{
-            //    bool exists = await context.CategoryTranslations
-            //        .Any(ct => ct.LanguageId == defoultLanguage.LanguageId && ct.CategoryName == category);
+                if (!exists)
+                {
+                    await context.Categories
+                        .AddAsync(new Category { DefaultName = category.CategoryName, Order = category.Order});
+                }
+            }
 
-            //    if (!exists)
-            //    {
-            //        await context.CategoryTranslations
-            //            .AddAsync(new CategoryTranslation { CategoryName = category });
-            //    }
-            //}
-
-            //await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 namespace CelebRateApi.Services
 {
     /// <summary>
-    /// Handles all user-account-identity business logic.
+    /// Handles all user-identity related business logic.
     /// </summary>
     /// <remarks>
     /// Typicaly uses ASP.NET Identity (UserManager) for database queries.

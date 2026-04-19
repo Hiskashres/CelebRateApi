@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CelebRateApi.Controllers
 {
     /// <summary>
-    /// Handles all User HTTP requests.
+    /// Handles all User related HTTP requests.
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
@@ -29,12 +29,8 @@ namespace CelebRateApi.Controllers
         public async Task<IActionResult> EditUserProfileAsync(UserDTO dto)
         {
             var user = await _userManager.FindByIdAsync(dto.UserId);
-
-            if (user == null)
-                return NotFound("User not found");
-
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, user, "IsOwner");
-            if (!authorizationResult.Succeeded && !User.IsInRole("Administrator"))
+            if (!authorizationResult.Succeeded && !User.IsInRole("Admin"))
                 return Forbid();
 
             var result = await _userService.EditUserProfileAsync(dto);
@@ -57,7 +53,7 @@ namespace CelebRateApi.Controllers
             return Ok("User changed");
         }
 
-        [Authorize(policy: "RequireModerator")]
+        [Authorize(policy: "RequireModerator")] 
         [HttpDelete("delete-users")]
         public async Task<IActionResult> DeleteUsersAsync(string[] userIds)
         {
@@ -74,6 +70,12 @@ namespace CelebRateApi.Controllers
         public async Task<IActionResult> RoleTesr(/*[FromQuery] string? culture*/)
         {
             return Ok(_localizer["Test"]);
+        }
+
+        [HttpGet("test-exception")]
+        public IActionResult TestException()
+        {
+            throw new Exception("Test exception");
         }
     }
 }
