@@ -24,6 +24,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CelebService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<TagService>();
 
 builder.Services.AddAuthentication(options =>
 {

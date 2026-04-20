@@ -19,6 +19,9 @@ namespace CelebRateApi.Services
         /// <returns> Tuple: indicates if succeeded and any error messages </returns>
         public async Task<(bool Success, IEnumerable<string>? Errors)> CreateNewCelebAsync(CelebDTO dto)
         {
+            if (!_context.Languages.Any(l => l.LanguageId == dto.LanguageId))
+                return (false, new[] { "Language not found" });
+
             var celeb = new Celeb { 
                 Stars = 0 ,
                 CelebTranslations = new List<CelebTranslation>
